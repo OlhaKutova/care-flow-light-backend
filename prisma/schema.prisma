@@ -14,6 +14,22 @@ enum ConsultStatus {
   RESOLVED
 }
 
+enum UserRole {
+  ADMIN
+  PATIENT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+
+  patient Patient? @relation("UserPatient")
+}
+
 model Clinic {
   id            String         @id @default(cuid())
   name          String
@@ -22,11 +38,15 @@ model Clinic {
 }
 
 model Patient {
-  id            String         @id @default(cuid())
-  name          String
-  email         String         @unique
-  createdAt     DateTime       @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+
   consultations Consultation[]
+
+  user   User?   @relation("UserPatient", fields: [userId], references: [id])
+  userId String? @unique
 }
 
 model Consultation {
@@ -34,11 +54,13 @@ model Consultation {
   status    ConsultStatus @default(NEW)
   summary   String
   createdAt DateTime      @default(now())
+
   clinicId  String
   patientId String
-  clinic    Clinic        @relation(fields: [clinicId], references: [id])
-  patient   Patient       @relation(fields: [patientId], references: [id])
-  notes     Note[]
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+  notes   Note[]
 }
 
 model Note {
