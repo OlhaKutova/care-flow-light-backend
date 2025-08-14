@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ConsultStatus {
+  NEW
+  TRIAGED
+  IN_PROGRESS
+  RESOLVED
+}
+
 model Clinic {
   id            String         @id @default(cuid())
   name          String
@@ -23,14 +30,14 @@ model Patient {
 }
 
 model Consultation {
-  id        String   @id @default(cuid())
-  status    String   @default("NEW") // NEW | TRIAGED | IN_PROGRESS | RESOLVED
+  id        String        @id @default(cuid())
+  status    ConsultStatus @default(NEW)
   summary   String
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
   clinicId  String
   patientId String
-  clinic    Clinic   @relation(fields: [clinicId], references: [id])
-  patient   Patient  @relation(fields: [patientId], references: [id])
+  clinic    Clinic        @relation(fields: [clinicId], references: [id])
+  patient   Patient       @relation(fields: [patientId], references: [id])
   notes     Note[]
 }
 
