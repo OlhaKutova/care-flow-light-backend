@@ -1,15 +1,43 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Clinic {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  consultations Consultation[]
+}
+
+model Patient {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  createdAt     DateTime       @default(now())
+  consultations Consultation[]
+}
+
+model Consultation {
+  id        String   @id @default(cuid())
+  status    String   @default("NEW") // NEW | TRIAGED | IN_PROGRESS | RESOLVED
+  summary   String
+  createdAt DateTime @default(now())
+  clinicId  String
+  patientId String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id])
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  notes     Note[]
+}
+
+model Note {
+  id             String       @id @default(cuid())
+  body           String
+  createdAt      DateTime     @default(now())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
 }
